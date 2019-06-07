@@ -26,8 +26,9 @@
 
 tool
 extends Label
-export(String, "Entypo", "FontAwesome", "MaterialCommunityIcons", "SimpleLineIcons",\
-	"EvilIcons", "Foundation", "MaterialIcons", "Zocial", "Feather", "Ionicons", "Octicons")\
+export(String, "AntDesign", "Entypo", "EvilIcons", "Feather", "FontAwesome",\
+	"FontAwesome5", "Fontisto", "Foundation", "Ionicons", "MaterialCommunityIcons",\
+	"MaterialIcons", "Octicons", "SimpleLineIcons", "Zocial")\
 	var icon_set = "Ionicons" setget _set_icon_set
 export(int, 0, 1000, 1) var size = 16 setget _set_size
 export var icon = "ios-analytics" setget _set_icon
@@ -60,8 +61,13 @@ func _set_icon_set(name):
 		_font = DynamicFont.new()
 		_font.set_font_data(font.FontData)
 		set("custom_fonts/font", _font)
+		update_content()
 
 func _ready():
 	self.icon_set = icon_set
+	update_content()
+	
+func update_content():
 	self.size = size
 	self.icon = icon
+	self.filter = filter
