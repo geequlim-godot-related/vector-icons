@@ -27,9 +27,22 @@
 tool
 extends EditorPlugin
 
+const MENUS = {
+	"Browse vector icons": 0,
+}
 
 func _enter_tree():
 	add_custom_type("VectorIcon", "Label",preload("VectorIcon.gd"), null )
 
 func _exit_tree():
 	remove_custom_type("VectorIcon")
+
+func _ready():
+	for key in MENUS:
+		add_tool_menu_item(key, self, '_on_menu_pressed', MENUS[key])
+
+func _on_menu_pressed(action):
+	match action:
+		0:
+			OS.shell_open('https://oblador.github.io/react-native-vector-icons')
+	
