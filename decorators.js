@@ -1,3 +1,12 @@
+/**
+ * Expose as an ECMAClass.
+ * An ECMAScript object is created and attached automaticly when construct an instance from this class
+ */
+export function gdclass(target) {
+    const id = gdclass['internal_class_id'] = gdclass['internal_class_id'] ? gdclass['internal_class_id'] + 1 : 1;
+    const class_name = `AnonymousECMAClass${id}`;
+    godot.register_class(target, class_name);
+}
 /** Set the script is runable in editor */
 export function tool(target) {
     godot.set_script_tooled(target, true);
@@ -9,42 +18,74 @@ export function icon(icon) {
     };
 }
 /** Register signal to godot script */
-export function signal(name) {
-    return function (target) {
-        godot.register_signal(target, name);
-    };
-}
-/**
- * Register multiple signals from an array or keys of an object
- * @param signals The object or array contains signal names
- */
-export function signals(signals) {
-    return function (target) {
-        let keys = [];
-        if (!Array.isArray) {
-            keys = Object.getOwnPropertyNames(signals);
-        }
-        for (const signal of keys) {
-            godot.register_signal(target, signal);
-        }
-    };
+export function signal(target, property, descriptor) {
+    var constructor = typeof (target) === 'function' ? target : target.constructor;
+    var prototype = constructor.prototype;
+    godot.register_signal(target, property);
+    descriptor = descriptor || {};
+    descriptor.value = property;
+    descriptor.writable = false;
+    Object.defineProperty(constructor, property, descriptor);
+    Object.defineProperty(prototype, property, descriptor);
 }
 /**
  * Register property to godot class
  * @param value The default value of the property
  */
-export function property(value) {
+export function property(info) {
     return function (target, property, descriptor) {
-        godot.register_property(target, property, value);
+        info = info || {};
+        godot.register_property(target, property, info);
         return descriptor;
     };
+}
+/**
+ * Return the node with `path` if the `_onready` is called
+ * @param path The path or the type to get the node
+ */
+export function onready(path) {
+    return function (target, property, descriptor) {
+        const key = `$onready:${property}`;
+        descriptor = descriptor || {};
+        descriptor.set = function (v) { this[key] = v; };
+        descriptor.get = function () {
+            let v = this[key];
+            if (!v) {
+                v = this.get_node(path);
+                this[key] = v;
+            }
+            return v;
+        };
+        return descriptor;
+    };
+}
+/**
+ * Register the member as a node property
+ * **Note: The value is null before current node is ready**
+ * @param path The default path name of the node
+ */
+export function node(target, property, descriptor) {
+    const key = `$onready:${property}`;
+    const path_key = `${property} `; // <-- a space at the end
+    descriptor = descriptor || {};
+    descriptor.set = function (v) { this[key] = v; };
+    descriptor.get = function () {
+        let v = this[key];
+        if (!v) {
+            v = this.get_node(this[path_key]);
+            this[key] = v;
+        }
+        return v;
+    };
+    godot.register_property(target, path_key, { type: godot.TYPE_NODE_PATH });
+    return descriptor;
 }
 /**
  * Register an enumeration property
  * @param enumeration Enumeration name list
  * @param default_value The default value of the property
  */
-export function enum_property(enumeration, default_value) {
+export function enumeration(enumeration, default_value) {
     return function (target, property, descriptor) {
         const pi = {
             hint: godot.PropertyHint.PROPERTY_HINT_ENUM,
@@ -62,19 +103,4 @@ export function enum_property(enumeration, default_value) {
         return descriptor;
     };
 }
-/**
- * Return the node with `path` if the `_onready` is called
- * @param path The path or the type to get the node
- */
-export function onready(path) {
-    return function (target, property, descriptor) {
-        descriptor.get = function () {
-            const key = `__on_ready_value:${property}`;
-            if (!this[key]) {
-                this[key] = this.get_node(path);
-            }
-            return this[key];
-        };
-        return descriptor;
-    };
-}
+//# sourceMappingURL=decorators.js.map

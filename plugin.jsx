@@ -33,3 +33,4 @@ VectorIconPlugin = __decorate([
     tool
 ], VectorIconPlugin);
 export default VectorIconPlugin;
+//# sourceMappingURL=plugin.jsx.map

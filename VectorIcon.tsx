@@ -1,4 +1,4 @@
-import { property, enum_property, tool } from "./decorators";
+import { property, enumeration, tool } from "./decorators";
 const IconSets = [
 	"AntDesign",
 	"Entypo",
@@ -20,12 +20,12 @@ const IconSets = [
 
 @tool
 export default class VectorIcon extends godot.Control {
-	
+
 	protected _font = new godot.DynamicFont();
 	protected _icon_sheet: Record<string, number>;
 	protected _char_code: number;
 
-	@enum_property(IconSets, IconSets[0])
+	@enumeration(IconSets, IconSets[0])
 	public get icon_set() : string { return this._icon_set; }
 	public set icon_set(v : string) {
 		if (this._icon_set != v) {
@@ -37,7 +37,7 @@ export default class VectorIcon extends godot.Control {
 	}
 	protected _icon_set : string;
 
-	@property('forward')
+	@property({ default: 'forward' } )
 	public get icon() : string { return this._icon; }
 	public set icon(v : string) {
 		this._icon = v;
@@ -47,15 +47,15 @@ export default class VectorIcon extends godot.Control {
 		}
 	}
 	protected _icon : string;
-	
-	@property(16)
+
+	@property({ default: 16 , type: godot.TYPE_INT})
 	public get size() : number { return this._font.size; }
 	public set size(v : number) {
 		this._font.size = v;
 		this.update();
 	}
 
-	@property(godot.Color.white)
+	@property({default :godot.Color.white})
 	public get color() : godot.Color { return this._color; }
 	public set color(v : godot.Color) {
 		this._color = v;
@@ -63,7 +63,7 @@ export default class VectorIcon extends godot.Control {
 	}
 	protected _color : godot.Color;
 
-	@property(true)
+	@property({default: true})
 	public get filter() : boolean { return this._font.use_filter; }
 	public set filter(v : boolean) {
 		this._font.use_filter = v;
